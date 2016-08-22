@@ -37,14 +37,14 @@ func ParseType(rdr *bufio.Reader) Value {
 	}
 
 	switch b[0] {
-	case 100:
+	case 100: // d (map)
 		return ParseMap(rdr)
-	case 49, 50, 51, 52, 53, 54, 55, 56, 57:
+	case 49, 50, 51, 52, 53, 54, 55, 56, 57: //number
 		l := ParseNumber(rdr).IntValue()
 		return ParseString(rdr, l)
-	case 105:
+	case 105: // i (number)
 		return ParseNumber(rdr)
-	case 101:
+	case 101: // e (end of data structure)
 		rdr.Discard(1)
 		ParseType(rdr)
 	}
@@ -52,6 +52,7 @@ func ParseType(rdr *bufio.Reader) Value {
 	return Value{}
 }
 
+//TODO: only works for one key value pair... move lines 47-49 into this function
 func ParseMap(rdr *bufio.Reader) Value {
 	m := make(map[string]Value)
 
