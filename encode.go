@@ -58,7 +58,7 @@ func EncodeMap(m map[string]interface{}) []byte {
 func EncodeList(l []interface{}) []byte {
 	var buffer bytes.Buffer
 
-	buffer.WriteString("d")
+	buffer.WriteString("l")
 
 	for _, v := range l {
 		switch v.(type) {
