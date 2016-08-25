@@ -23,6 +23,18 @@ func main() {
 		panic("Failed to read from file")
 	}
 
-	r := ParseBencode(enc)
+	m := Decode(enc)
+
+	fmt.Println("Decoded: " + f.Name())
+	fmt.Println(m)
+
+	r := Encode(m)
+	out, err := os.Create("temp")
+	check(err)
+	n2, err := out.Write(r)
+	check(err)
+
+	fmt.Printf("wrote %d bytes\n", n2)
+	fmt.Println("Encoded to: " + out.Name())
 	fmt.Println(r)
 }

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ParseBencode(enc []byte) interface{} {
+func Decode(enc []byte) interface{} {
 	byteReader := bytes.NewReader(enc)
 	rdr := bufio.NewReader(byteReader)
 	return ParseType(rdr)
@@ -15,9 +15,7 @@ func ParseBencode(enc []byte) interface{} {
 
 func ParseType(rdr *bufio.Reader) interface{} {
 	b, err := rdr.Peek(1)
-	if err != nil {
-		panic("failed to read byte")
-	}
+	check(err)
 
 	switch b[0] {
 	case 100: // d (map)
@@ -44,9 +42,7 @@ func ParseMap(rdr *bufio.Reader) map[string]interface{} {
 		k := ParseType(rdr).(string)
 		m[k] = ParseType(rdr)
 		ba, err := rdr.Peek(1)
-		if err != nil {
-			panic("Peek error in parsemap")
-		}
+		check(err)
 		b = ba[0]
 	}
 
@@ -64,9 +60,7 @@ func ParseList(rdr *bufio.Reader) []interface{} {
 	for b != 101 {
 		l = append(l, ParseType(rdr))
 		ba, err := rdr.Peek(1)
-		if err != nil {
-			panic("Peek error in parsemap")
-		}
+		check(err)
 		b = ba[0]
 	}
 
@@ -76,23 +70,22 @@ func ParseList(rdr *bufio.Reader) []interface{} {
 
 func ParseNumber(rdr *bufio.Reader) uint64 {
 	rdr.Discard(1)
-	cb, err := rdr.ReadString(byte(101))
-	iv, err := strconv.ParseUint(strings.TrimSuffix(cb, "e"), 10, 64)
 
-	if err != nil {
-		panic("Failed to parse number")
-	}
+	cb, err := rdr.ReadString(byte(101))
+	check(err)
+
+	iv, err := strconv.ParseUint(strings.TrimSuffix(cb, "e"), 10, 64)
+	check(err)
 
 	return iv
 }
 
 func ParseLength(rdr *bufio.Reader) uint64 {
 	cb, err := rdr.ReadString(byte(58))
-	iv, err := strconv.ParseUint(strings.TrimSuffix(cb, ":"), 10, 64)
+	check(err)
 
-	if err != nil {
-		panic("Failed to parse number")
-	}
+	iv, err := strconv.ParseUint(strings.TrimSuffix(cb, ":"), 10, 64)
+	check(err)
 
 	return iv
 }
@@ -103,11 +96,15 @@ func ParseString(rdr *bufio.Reader) string {
 
 	for i := uint64(0); i < l; i++ {
 		b, err := rdr.ReadByte()
-		if err != nil {
-			panic("Failed to read byte")
-		}
+		check(err)
 		s = append(s, b)
 	}
 
 	return string(s)
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
