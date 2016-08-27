@@ -1,4 +1,4 @@
-package main
+package bencode
 
 import (
 	"bufio"
@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func main() {
+func test() {
 	if len(os.Args) < 2 {
 		panic("No arguments")
 	}
